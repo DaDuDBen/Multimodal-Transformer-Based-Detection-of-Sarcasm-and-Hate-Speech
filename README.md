@@ -1,38 +1,39 @@
 # Multimodal Transformer-Based Detection of Sarcasm and Hate Speech
 
-## Coursework implementation status
-This repository now includes concrete implementation scaffolding for **steps 1-4** of the coursework development plan:
-1. project framing and success criteria,
-2. reproducible repository setup,
-3. data acquisition + unified schema + stratified splits,
-4. text/image preprocessing pipeline.
+This repository now includes implementation scaffolding for:
+- steps 1–4 (scope, setup, data, preprocessing), and
+- model/training/evaluation milestones (steps 5–8).
 
-## Project layout
-- `configs/project_scope.yaml`: task definitions, evaluation criteria.
-- `configs/data_sources.yaml`: public dataset candidates and target schema.
-- `src/preprocessing/text.py`: NFKC normalization, hashtag expansion, emoji mapping, sarcasm marker extraction.
-- `src/preprocessing/image.py`: 224x224 letterboxing + constrained augmentation.
-- `scripts/download_public_dataset.py`: helper to pull a public Hugging Face dataset.
-- `scripts/prepare_dataset.py`: unify columns and build stratified train/val/test splits.
-- `COURSEWORK_DEVELOPMENT_PLAN.md`: full 5-week development plan.
+## Implemented components
+- `src/models/`
+  - `fusion.py`: symmetric cross-attention + concat fusion baseline
+  - `detector.py`: `MultimodalDetector` (CLIP-ViT + BERTweet, projection, fusion, dual heads)
+- `src/training/`
+  - `losses.py`: Focal loss, InfoNCE alignment loss, uncertainty weighting
+  - `trainer.py`: 2-stage training (freeze encoders, then full fine-tuning)
+- `src/evaluation/metrics.py`
+  - Macro-F1, AUC-ROC, precision/recall/F1 for binary tasks
+- `scripts/`
+  - `download_public_dataset.py`: Hugging Face dataset download
+  - `prepare_dataset.py`: unified schema + 70/15/15 split
+  - `train.py`: stage-1/stage-2 training loop
+  - `evaluate.py`: checkpoint evaluation on a parquet split
+  - `run_baselines.py`: baseline/ablation experiment spec generation
 
-## Quick start
+## Install
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 1) Download a public dataset (example)
+## Data prep
 ```bash
 python scripts/download_public_dataset.py \
   --dataset limjiayi/hateful_memes_expanded \
   --split train \
   --output data/raw/hateful_memes_train.parquet
-```
 
-### 2) Build unified schema and 70/15/15 splits
-```bash
 python scripts/prepare_dataset.py \
   --input data/raw/hateful_memes_train.parquet \
   --source hateful_memes_expanded \
@@ -43,7 +44,26 @@ python scripts/prepare_dataset.py \
   --output-dir data/processed
 ```
 
-> Note: If your source dataset has only one label, map the missing task label to 0 or merge with a second dataset before training multitask models.
+## Train
+```bash
+python scripts/train.py \
+  --config configs/train.yaml \
+  --train-parquet data/processed/train.parquet \
+  --val-parquet data/processed/val.parquet \
+  --output reports/train_history.json
+```
 
-## Next steps
-Continue with model implementation/training/evaluation milestones in `COURSEWORK_DEVELOPMENT_PLAN.md`.
+## Evaluate
+```bash
+python scripts/evaluate.py \
+  --config configs/eval.yaml \
+  --parquet data/processed/test.parquet \
+  --checkpoint reports/model.pt \
+  --output reports/eval_metrics.json
+```
+
+## Baselines
+```bash
+python scripts/run_baselines.py
+cat reports/baselines.json
+```
