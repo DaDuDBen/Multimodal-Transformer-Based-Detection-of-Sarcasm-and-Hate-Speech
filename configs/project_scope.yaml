@@ -1,0 +1,26 @@
+project:
+  name: multimodal-sarcasm-hate-coursework
+  objective: Build and evaluate a multitask multimodal model for sarcasm and hate speech detection in memes.
+
+tasks:
+  sarcasm:
+    type: binary
+    positive_label: 1
+  hate_speech:
+    type: binary
+    positive_label: 1
+
+success_criteria:
+  primary_metrics:
+    - macro_f1
+    - auc_roc
+  secondary_metrics:
+    - classwise_precision
+    - classwise_recall
+    - classwise_f1
+    - confusion_matrix
+
+report_requirements:
+  - reproducibility
+  - baseline_comparison
+  - ablation_study

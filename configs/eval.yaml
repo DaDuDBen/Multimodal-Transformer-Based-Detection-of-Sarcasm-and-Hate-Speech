@@ -1,0 +1,15 @@
+model:
+  vision_model_name: openai/clip-vit-base-patch16
+  text_model_name: vinai/bertweet-large
+  d_model: 512
+  n_head: 8
+  dropout: 0.3
+  fusion_type: cross_attention
+  vision_hidden_size: 768
+  text_hidden_size: 1024
+
+data:
+  max_length: 128
+
+evaluation:
+  batch_size: 8

@@ -1,0 +1,29 @@
+# Public datasets that can be used for coursework prototyping.
+# Verify licensing/terms before submission.
+datasets:
+  - name: multimodal_hate_speech
+    provider: Hugging Face
+    id: limjiayi/hateful_memes_expanded
+    expected_columns:
+      image: image
+      text: text
+      label: label
+    tasks_supported: [hate_speech]
+
+  - name: multimodal_sarcasm
+    provider: Hugging Face
+    id: xfam/MediaSum # placeholder fallback if primary source unavailable
+    expected_columns:
+      image: null
+      text: text
+      label: null
+    tasks_supported: [sarcasm]
+    note: Replace with a dedicated sarcasm meme dataset if available in your environment.
+
+schema:
+  unified_columns:
+    - image_path
+    - text
+    - sarcasm_label
+    - hate_label
+    - source_dataset
